@@ -1,0 +1,20 @@
+name: Structure Orchestrator
+
+on:
+  workflow_dispatch:
+    inputs:
+      target-repos:
+        description: "Comma-separated list of GitHub repos to update"
+        required: false
+
+jobs:
+  orchestrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Spread the Structure!
+        env:
+          REPOS: ${{ github.event.inputs.target-repos }}
+        run: |
+          for repo in $(echo $REPOS | tr "," " "); do
+            gh workflow run reusable-build.yml -R "$repo" --ref main
+          done
