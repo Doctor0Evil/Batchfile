@@ -1,0 +1,12 @@
+name: Cross-Repo Integration Pipeline
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  run-external-pipeline:
+    uses: utility-org/reusable-workflows/.github/workflows/build-test-deploy.yml@main
+    with:
+      environment: "production"
+    secrets: inherit
