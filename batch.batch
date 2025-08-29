@@ -1,0 +1,49 @@
+@echo off
+REM === ALN Universal Data Ingestion Trigger ===
+REM Trigger ingest, sync, or reset operations in a compatible ALN repo root or CI workspace.
+
+setlocal enabledelayedexpansion
+
+:: Optional: Set ALN_HOME directory if not already set
+if "%ALN_HOME%"=="" set "ALN_HOME=%~dp0"
+
+REM Log header/banner
+echo --------------------------------------------
+echo   [ALN] DATA INGEST/RESYNC BATCH RUNNER
+echo   Time: %DATE% %TIME%
+echo   ALN_HOME: %ALN_HOME%
+echo --------------------------------------------
+
+REM Step 1: Test for main ALN PowerShell launcher
+if exist "%ALN_HOME%aln.ps1" (
+    REM Attempt data resync/ingest first, fallback to generic bootstrap
+    powershell -File "%ALN_HOME%aln.ps1" -task ingest
+    if !errorlevel! neq 0 (
+        echo [WARN] Data ingestion via ALN.ps1 failed (!errorlevel!). Attempting generic boot...
+        powershell -File "%ALN_HOME%aln.ps1"
+        if !errorlevel! neq 0 (
+            echo [ERROR] PowerShell ALN bootstrap failed: !errorlevel!
+            exit /b !errorlevel!
+        )
+    )
+) else (
+    echo [ERROR] aln.ps1 not found in %ALN_HOME%.
+    exit /b 1
+)
+
+REM Step 2: Trigger additional CI scripts if present
+if exist "%ALN_HOME%resync-ingestion.sh" (
+    REM If running in WSL, Git Bash, or compatible shell, run .sh
+    echo [ALN] Found resync-ingestion.sh, executing shell pipeline...
+    bash "%ALN_HOME%resync-ingestion.sh"
+    if !errorlevel! neq 0 (
+        echo [WARN] Shell pipeline failed: !errorlevel!
+    )
+)
+
+REM Optional: List status/log for debugging
+if exist "%ALN_HOME%show-status.ps1" (
+    powershell -File "%ALN_HOME%show-status.ps1"
+)
+
+echo [ALN] Data ingestion batch complete.
