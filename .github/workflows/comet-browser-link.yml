@@ -1,0 +1,17 @@
+name: Comet Browser Trigger
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # every 6 hours
+
+jobs:
+  comet_browse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo Comet Link
+        run: echo "Comet Browser: use https://www.perplexity.ai/comet/ for interactive QA and project loops!"
+      - name: Call Internal API
+        run: |
+          # Placeholder for CI call to Comet Browser API
+          curl -X POST https://api.cometbrowser.dev/pipeline-hook -d '{"repo":"${{ github.repository }}"}'
