@@ -1,0 +1,24 @@
+name: Build Test Deploy (Reusable)
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: false
+        default: "staging"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: ./build/build.bat || ./build/build.sh
+      - name: Test
+        run: ./build/test.bat || ./build/test.sh
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy
+        run: ./build/deploy.bat dist ${{ inputs.environment }} || ./build/deploy.sh dist ${{ inputs.environment }}
