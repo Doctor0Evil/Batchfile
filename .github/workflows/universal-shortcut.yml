@@ -1,0 +1,27 @@
+name: Universal Shortcut Pipeline
+
+on:
+  workflow_dispatch:    # manual run
+  push:
+    paths:
+      - 'batch.batch'
+      - 'build/**'
+      - 'scripts/**'
+  pull_request:
+
+jobs:
+  shortcut:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: ./build/build.bat || ./build/build.sh
+      - name: Test
+        run: ./build/test.bat || ./build/test.sh
+      - name: Deploy (Shortcut)
+        run: ./build/deploy.bat dist || ./build/deploy.sh dist
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: batchfile-dist
+          path: dist
